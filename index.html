@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeamSELCA - Calendario Colaborativo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        .navbar {
+            background-color: #001744;
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-profile img {
+            width: 40px;
+            border-radius: 5%;
+            margin-left: 10px;
+        }
+
+        .main-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #003366;
+            color: white;
+            padding: 1.5rem;
+            border-right: 2px solid #001744;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar h2 {
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+        }
+
+        .sidebar button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            background-color: #f39c12;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar button:hover {
+            background-color: #e67e22;
+        }
+
+        .team-list h3 {
+            margin-bottom: 10px;
+        }
+
+        .team-list ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .team-list li {
+            padding: 10px;
+            background-color: #004080;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .team-list li:hover {
+            background-color: #003366;
+        }
+
+        .calendar-container {
+            flex: 1;
+            padding: 1.5rem;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .prev-month, .next-month {
+            background-color: #f39c12;
+            border: none;
+            padding: 10px;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .prev-month:hover, .next-month:hover {
+            background-color: #e67e22;
+        }
+
+        .calendar {
+            display: grid;
+            grid-template-rows: auto 1fr;
+        }
+
+        .day-names {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            background-color: #001744;
+            color: white;
+            padding: 10px 0;
+        }
+
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            grid-auto-rows: 100px;
+            gap: 5px;
+        }
+
+        .days-grid div {
+            background-color: white;
+            border: 1px solid #ccc;
+            padding: 10px;
+            position: relative;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .days-grid div.event {
+            color: white; /* Texto blanco para contraste */
+        }
+
+        .today {
+            background-color: #ffcccc;
+            font-weight: bold;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: auto;
+            padding: 20px;
+            width: 40%;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: black;
+        }
+
+        .input-container {
+            margin-top: 10px;
+        }
+
+        .input-container input,
+        .input-container textarea,
+        .input-container select {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .btn-submit {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn-submit:hover {
+            background-color: #0056b3;
+        }
+
+        .status-icon {
+            margin-right: 5px;
+        }
+
+        .status-urgente {
+            color: #dc3545; /* Red */
+        }
+
+        .status-medio {
+            color: #ffc107; /* Yellow */
+        }
+
+        .status-basico {
+            color: #28a745; /* Green */
+        }
+
+        .mini-calendar-container {
+    margin-top: 20px;
+}
+
+#mini-calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    background-color: white;
+    color: #333;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+#mini-calendar div {
+    text-align: center;
+    padding: 5px;
+    font-size: 0.5rem;
+    border-radius: 3px;
+    margin-left: -66%;
+}
+
+#mini-calendar .day-name {
+    font-weight: bold;
+    color: #001744;
+}
+
+#mini-calendar .today {
+    background-color: #f39c12;
+    color: white;
+    font-weight: bold;
+}
+
+    </style>
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <div class="logo">TeamSELCA</div>
+            <div class="user-profile">
+                <span>Bienvenido, Usuario</span>
+                <img src="./assets/img/logo-favicon.png" alt="Avatar">
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <h2>Panel de Control</h2>
+            <div class="mini-calendar-container">
+                <div id="mini-calendar"></div>
+            </div>
+            <br>         
+            <button class="btn-add-event">Añadir Evento</button>
+            <button class="btn-add-member" id="add-member-btn">Añadir Miembro</button>
+            <div class="team-list">
+                <h3>Miembros del equipo</h3>
+                <ul id="team-members">
+                    <li><span>Juan Pérez</span></li>
+                    <li><span>María González</span></li>
+                    <li><span>Ana López</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <button class="prev-month">Anterior</button>
+                <h2 id="current-month"></h2>
+                <button class="next-month">Siguiente</button>
+            </div>
+
+            <div class="calendar">
+                <div class="day-names">
+                    <div>Domingo</div>
+                    <div>Lunes</div>
+                    <div>Martes</div>
+                    <div>Miércoles</div>
+                    <div>Jueves</div>
+                    <div>Viernes</div>
+                    <div>Sábado</div>
+                </div>
+                <div id="calendar-days" class="days-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para añadir evento -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Añadir Evento</h2>
+            <form id="add-event-form">
+                <div class="input-container">
+                    <label for="event-title">Título del Evento</label>
+                    <input type="text" id="event-title" required>
+                </div>
+                <div class="input-container">
+                    <label for="event-date">Fecha</label>
+                    <input type="date" id="event-date" required>
+                </div>
+                <div class="input-container">
+                    <label for="event-description">Descripción</label>
+                    <textarea id="event-description" rows="4"></textarea>
+                </div>
+                <div class="input-container">
+                    <label for="event-collaborator">Asignar a Colaborador</label>
+                    <select id="event-collaborator" required>
+                        <option value="">Seleccione un colaborador</option>
+                        <option value="Juan Pérez">Juan Pérez</option>
+                        <option value="María González">María González</option>
+                        <option value="Ana López">Ana López</option>
+                    </select>
+                </div>
+                <div class="input-container">
+                    <label for="event-status">Estado</label>
+                    <select id="event-status" required>
+                        <option value="">Seleccione un estado</option>
+                        <option value="urgente">Urgente</option>
+                        <option value="medio">Medio</option>
+                        <option value="basico">Básico</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-submit">Guardar Evento</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+
+const calendarDays = document.getElementById("calendar-days");
+        const currentMonth = document.getElementById("current-month");
+        const modal = document.getElementById("modal");
+        const closeModal = document.querySelector(".close");
+        const addEventForm = document.getElementById("add-event-form");
+        const addEventButton = document.querySelector(".btn-add-event");
+
+        let events = [];
+        let selectedDate = new Date();
+        let month = selectedDate.getMonth();
+        let year = selectedDate.getFullYear();
+
+        function displayCalendar() {
+            calendarDays.innerHTML = '';
+
+            const firstDay = new Date(year, month, 1);
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const startDay = firstDay.getDay();
+
+            // Celdas vacías antes del primer día del mes
+            for (let i = 0; i < startDay; i++) {
+                const emptyDiv = document.createElement("div");
+                calendarDays.appendChild(emptyDiv);
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayDiv = document.createElement("div");
+                dayDiv.className = "day";
+                dayDiv.onclick = () => openModal(day);
+
+                // Resaltar el día actual
+                if (day === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear()) {
+                    dayDiv.classList.add("today");
+                }
+
+                // Comprobar si hay eventos para este día
+                const eventForDay = events.find(event => 
+                    event.date.getDate() === day && event.date.getMonth() === month && event.date.getFullYear() === year
+                );
+
+                // Si hay un evento, aplicar un estilo especial y mostrar información
+                if (eventForDay) {
+                    dayDiv.classList.add("event");
+                    dayDiv.style.backgroundColor = getStatusColor(eventForDay.status); // Establecer color de fondo según el estado
+                    
+                    // Mostrar el ícono de estado, el título del evento y el día
+                    dayDiv.innerHTML = `
+                        <span class="status-icon"> ${getStatusIcon(eventForDay.status)}  ${day} </span> <br> ${eventForDay.title}  <br>
+                        <span>${eventForDay.collaborator} </span>
+                    `;
+                } else {
+                    // Si no hay evento, solo mostrar el día
+                    dayDiv.textContent = day; // Solo mostrar el día
+                }
+
+                calendarDays.appendChild(dayDiv);
+            }
+        }
+
+        function openModal(day) {
+    // Crear una nueva fecha con el día seleccionado, mes y año actuales
+    selectedDate = new Date(year, month, day); // Asumiendo que month es el índice del mes (0-11)
+    document.getElementById("event-date").value = selectedDate.toISOString().split("T")[0]; // Establece el valor de la fecha en el formato correcto (YYYY-MM-DD)
+
+    // Mostrar información del evento si ya existe uno en esta fecha
+    const existingEvent = events.find(event => 
+        event.date.getDate() === day && 
+        event.date.getMonth() === month && 
+        event.date.getFullYear() === year
+    );
+    
+    if (existingEvent) {
+        document.getElementById("event-title").value = existingEvent.title;
+        document.getElementById("event-description").value = existingEvent.description;
+        document.getElementById("event-collaborator").value = existingEvent.collaborator;
+        document.getElementById("event-status").value = existingEvent.status;
+    } else {
+        document.getElementById("event-title").value = '';
+        document.getElementById("event-description").value = '';
+        document.getElementById("event-collaborator").value = '';
+        document.getElementById("event-status").value = '';
+    }
+
+    modal.style.display = "flex";
+}
+
+
+// Cambia el método de agregar el evento
+function addEvent(event) {
+    event.preventDefault();
+    const title = document.getElementById("event-title").value;
+    const description = document.getElementById("event-description").value;
+    const collaborator = document.getElementById("event-collaborator").value;
+    const status = document.getElementById("event-status").value;
+
+    // Crear una nueva fecha con la fecha del input
+    const eventDate = new Date(document.getElementById("event-date").value);
+
+    // Buscar si ya existe un evento en la misma fecha
+    const existingEventIndex = events.findIndex(e => 
+        e.date.getTime() === eventDate.getTime() // Compara el tiempo para evitar problemas de comparación
+    );
+
+    if (existingEventIndex >= 0) {
+        // Si existe, actualizar el evento
+        events[existingEventIndex] = {
+            title,
+            date: eventDate,
+            description,
+            collaborator,
+            status
+        };
+    } else {
+        // Si no existe, agregar un nuevo evento
+        events.push({
+            title,
+            date: eventDate,
+            description,
+            collaborator,
+            status
+        });
+    }
+
+    closeModalFunction();
+    displayCalendar();
+}
+
+
+        function closeModalFunction() {
+            modal.style.display = "none";
+        }
+
+        
+
+        function getStatusIcon(status) {
+            switch (status) {
+                case 'urgente':
+                    return '<i class="fas fa-exclamation-triangle"></i>';
+                case 'medio':
+                    return '<i class="fas fa-exclamation-circle"></i>';
+                case 'basico':
+                    return '<i class="fas fa-check-circle"></i>';
+                default:
+                    return '';
+            }
+        }
+
+        function getStatusColor(status) {
+            switch (status) {
+                case 'urgente':
+                    return 'red';
+                case 'medio':
+                    return 'yellow';
+                case 'basico':
+                    return 'green';
+                default:
+                    return '';
+            }
+        }
+
+        addEventButton.addEventListener("click", () => {
+            openModal(new Date().getDate());
+        });
+
+        closeModal.addEventListener("click", closeModalFunction);
+        addEventForm.addEventListener("submit", addEvent);
+
+
+        function saveEvent() {
+    const title = document.getElementById("event-title").value;
+    const description = document.getElementById("event-description").value;
+    const collaborator = document.getElementById("event-collaborator").value;
+    const status = document.getElementById("event-status").value;
+
+    // Asegúrate de que la fecha se establezca correctamente
+    const eventDate = new Date(year, month, selectedDate.getDate()); // Usar selectedDate para obtener el día
+
+    const event = {
+        title: title,
+        description: description,
+        collaborator: collaborator,
+        status: status,
+        date: eventDate // Asegúrate de usar la fecha correcta aquí
+    };
+
+    // Agregar el evento al array de eventos
+    events.push(event);
+    
+    // Actualiza el calendario o haz lo que necesites para reflejar el nuevo evento
+    updateCalendar();
+    modal.style.display = "none"; // Cierra el modal
+}
+
+
+
+        // Inicializar el calendario
+        displayCalendar();
+
+        function updateCurrentMonth() {
+    const options = { month: 'long', year: 'numeric' };
+    currentMonth.textContent = new Date(year, month).toLocaleString('es-ES', options);
+}
+
+function displayCalendar() {
+    // Llama a la función para actualizar el mes actual
+    updateCurrentMonth();
+    
+    calendarDays.innerHTML = '';
+
+    const firstDay = new Date(year, month, 1);
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const startDay = firstDay.getDay();
+
+    for (let i = 0; i < startDay; i++) {
+        const emptyDiv = document.createElement("div");
+        calendarDays.appendChild(emptyDiv);
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dayDiv = document.createElement("div");
+        dayDiv.className = "day";
+        dayDiv.onclick = () => openModal(day);
+
+        if (day === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear()) {
+            dayDiv.classList.add("today");
+        }
+
+        const eventForDay = events.find(event => 
+            event.date.getDate() === day && event.date.getMonth() === month && event.date.getFullYear() === year
+        );
+
+        if (eventForDay) {
+            dayDiv.classList.add("event");
+            dayDiv.style.backgroundColor = getStatusColor(eventForDay.status);
+            dayDiv.innerHTML = `
+                <span class="status-icon"> ${getStatusIcon(eventForDay.status)}  ${day} </span> <br> ${eventForDay.title}  <br>
+                <span>${eventForDay.collaborator} </span>
+            `;
+        } else {
+            dayDiv.textContent = day;
+        }
+
+        calendarDays.appendChild(dayDiv);
+    }
+}
+
+document.querySelector(".prev-month").addEventListener("click", () => {
+    month--;
+    if (month < 0) {
+        month = 11;
+        year--;
+    }
+    displayCalendar();
+});
+
+document.querySelector(".next-month").addEventListener("click", () => {
+    month++;
+    if (month > 11) {
+        month = 0;
+        year++;
+    }
+    displayCalendar();
+});
+
+// Inicializar el calendario con el mes actual
+displayCalendar();
+
+const miniCalendarContainer = document.getElementById("mini-calendar");
+
+function displayMiniCalendar() {
+    const today = new Date();
+    const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+    const startDay = new Date(today.getFullYear(), today.getMonth(), 1).getDay();
+
+    const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+
+    miniCalendarContainer.innerHTML = '';
+
+    // Agregar los nombres de los días
+    dayNames.forEach(day => {
+        const dayNameDiv = document.createElement('div');
+        dayNameDiv.className = 'day-name';
+        dayNameDiv.innerText = day;
+        miniCalendarContainer.appendChild(dayNameDiv);
+    });
+
+    // Agregar celdas vacías antes del primer día del mes
+    for (let i = 0; i < startDay; i++) {
+        const emptyDiv = document.createElement('div');
+        miniCalendarContainer.appendChild(emptyDiv);
+    }
+
+    // Agregar los días del mes
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dayDiv = document.createElement('div');
+        dayDiv.innerText = day;
+
+        // Resaltar el día actual
+        if (day === today.getDate()) {
+            dayDiv.classList.add('today');
+        }
+
+        miniCalendarContainer.appendChild(dayDiv);
+    }
+}
+
+displayMiniCalendar();
+
+
+    </script>
+</body>
+</html>
