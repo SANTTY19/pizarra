@@ -22,11 +22,13 @@
         <div class="sidebar">
             <h2>Panel de Control</h2>
             <div class="mini-calendar-container">
-                
+                <div id="month-year" class="month-year-display"></div>
                 <div id="mini-calendar"></div>
+                
             </div>
+            
             <br>            
-            <button class="btn-add-event">Añadir Evento</button>
+            <button class="btn-add-event" id="add-event-btn">Añadir Evento</button>
             <button class="btn-add-member" id="add-member-btn">Añadir Miembro</button>
             <div class="team-list">
                 <h3>Miembros del equipo</h3>
@@ -44,8 +46,6 @@
                 <h2 id="current-month"></h2>
                 <button class="next-month">Siguiente</button>
             </div>
-
-            
 
             <div class="calendar">
                 <div class="day-names">
@@ -104,164 +104,74 @@
     </div>
 
     <!-- Modal para añadir miembro -->
-<div id="addMemberModal" class="modal">
-    <div class="modal-content">
-        <span class="close-member-modal">&times;</span>
-        <h2>Añadir Miembro</h2>
-        <form id="addMemberForm">
-            <div class="input-container">
-                <label for="member-name">Nombre del Miembro:</label>
-                <input type="text" id="member-name" name="member-name" required>
-            </div>
-            <div class="input-container">
-                <label for="member-role">Rol:</label>
-                <select id="member-role" name="member-role" required>
-                    <option value="tecnico">Técnico</option>
-                    <option value="administrativo">Administrativo</option>
-                </select>
-            </div>
-            <button type="submit" class="btn-submit">Añadir Miembro</button>
-        </form>
+    <div id="addMemberModal" class="modal">
+        <div class="modal-content">
+            <span class="close-member-modal">&times;</span>
+            <h2>Añadir Miembro</h2>
+            <form id="addMemberForm">
+                <div class="input-container">
+                    <label for="member-name">Nombre del Miembro:</label>
+                    <input type="text" id="member-name" name="member-name" required>
+                </div>
+                <div class="input-container">
+                    <label for="member-role">Rol:</label>
+                    <select id="member-role" name="member-role" required>
+                        <option value="tecnico">Técnico</option>
+                        <option value="administrativo">Administrativo</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-submit">Añadir Miembro</button>
+            </form>
+        </div>
     </div>
-</div>
-
 
     <script>
-
-const calendarDays = document.getElementById("calendar-days");
+        const calendarDays = document.getElementById("calendar-days");
         const currentMonth = document.getElementById("current-month");
-        const modal = document.getElementById("modal");
-        const closeModal = document.querySelector(".close");
-        const addEventForm = document.getElementById("add-event-form");
-        const addEventButton = document.querySelector(".btn-add-event");
-
+        
         let events = [];
         let selectedDate = new Date();
         let month = selectedDate.getMonth();
         let year = selectedDate.getFullYear();
-
+        
         function displayCalendar() {
             calendarDays.innerHTML = '';
-
             const firstDay = new Date(year, month, 1);
             const daysInMonth = new Date(year, month + 1, 0).getDate();
             const startDay = firstDay.getDay();
-
-            // Celdas vacías antes del primer día del mes
+    
             for (let i = 0; i < startDay; i++) {
                 const emptyDiv = document.createElement("div");
                 calendarDays.appendChild(emptyDiv);
             }
-
+    
             for (let day = 1; day <= daysInMonth; day++) {
                 const dayDiv = document.createElement("div");
                 dayDiv.className = "day";
-                dayDiv.onclick = () => openModal(day);
-
-                // Resaltar el día actual
+    
                 if (day === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear()) {
                     dayDiv.classList.add("today");
                 }
-
-                // Comprobar si hay eventos para este día
+    
                 const eventForDay = events.find(event => 
                     event.date.getDate() === day && event.date.getMonth() === month && event.date.getFullYear() === year
                 );
-
-                // Si hay un evento, aplicar un estilo especial y mostrar información
+    
                 if (eventForDay) {
                     dayDiv.classList.add("event");
-                    dayDiv.style.backgroundColor = getStatusColor(eventForDay.status); // Establecer color de fondo según el estado
-                    
-                    // Mostrar el ícono de estado, el título del evento y el día
+                    dayDiv.style.backgroundColor = getStatusColor(eventForDay.status);
                     dayDiv.innerHTML = `
                         <span class="status-icon"> ${getStatusIcon(eventForDay.status)}  ${day} </span> <br> ${eventForDay.title}  <br>
                         <span>${eventForDay.collaborator} </span>
                     `;
                 } else {
-                    // Si no hay evento, solo mostrar el día
-                    dayDiv.textContent = day; // Solo mostrar el día
+                    dayDiv.textContent = day;
                 }
-
+    
                 calendarDays.appendChild(dayDiv);
             }
         }
-
-        function openModal(day) {
-    // Crear una nueva fecha con el día seleccionado, mes y año actuales
-    selectedDate = new Date(year, month, day); // Asumiendo que month es el índice del mes (0-11)
-    document.getElementById("event-date").value = selectedDate.toISOString().split("T")[0]; // Establece el valor de la fecha en el formato correcto (YYYY-MM-DD)
-
-    // Mostrar información del evento si ya existe uno en esta fecha
-    const existingEvent = events.find(event => 
-        event.date.getDate() === day && 
-        event.date.getMonth() === month && 
-        event.date.getFullYear() === year
-    );
-    
-    if (existingEvent) {
-        document.getElementById("event-title").value = existingEvent.title;
-        document.getElementById("event-description").value = existingEvent.description;
-        document.getElementById("event-collaborator").value = existingEvent.collaborator;
-        document.getElementById("event-status").value = existingEvent.status;
-    } else {
-        document.getElementById("event-title").value = '';
-        document.getElementById("event-description").value = '';
-        document.getElementById("event-collaborator").value = '';
-        document.getElementById("event-status").value = '';
-    }
-
-    modal.style.display = "flex";
-}
-
-
-// Cambia el método de agregar el evento
-function addEvent(event) {
-    event.preventDefault();
-    const title = document.getElementById("event-title").value;
-    const description = document.getElementById("event-description").value;
-    const collaborator = document.getElementById("event-collaborator").value;
-    const status = document.getElementById("event-status").value;
-
-    // Crear una nueva fecha con la fecha del input
-    const eventDate = new Date(document.getElementById("event-date").value);
-
-    // Buscar si ya existe un evento en la misma fecha
-    const existingEventIndex = events.findIndex(e => 
-        e.date.getTime() === eventDate.getTime() // Compara el tiempo para evitar problemas de comparación
-    );
-
-    if (existingEventIndex >= 0) {
-        // Si existe, actualizar el evento
-        events[existingEventIndex] = {
-            title,
-            date: eventDate,
-            description,
-            collaborator,
-            status
-        };
-    } else {
-        // Si no existe, agregar un nuevo evento
-        events.push({
-            title,
-            date: eventDate,
-            description,
-            collaborator,
-            status
-        });
-    }
-
-    closeModalFunction();
-    displayCalendar();
-}
-
-
-        function closeModalFunction() {
-            modal.style.display = "none";
-        }
-
         
-
         function getStatusIcon(status) {
             switch (status) {
                 case 'urgente':
@@ -274,7 +184,7 @@ function addEvent(event) {
                     return '';
             }
         }
-
+        
         function getStatusColor(status) {
             switch (status) {
                 case 'urgente':
@@ -287,244 +197,155 @@ function addEvent(event) {
                     return '';
             }
         }
-
-        addEventButton.addEventListener("click", () => {
-            openModal(new Date().getDate());
-        });
-
-        closeModal.addEventListener("click", closeModalFunction);
-        addEventForm.addEventListener("submit", addEvent);
-
-
-        function saveEvent() {
-    const title = document.getElementById("event-title").value;
-    const description = document.getElementById("event-description").value;
-    const collaborator = document.getElementById("event-collaborator").value;
-    const status = document.getElementById("event-status").value;
-
-    // Asegúrate de que la fecha se establezca correctamente
-    const eventDate = new Date(year, month, selectedDate.getDate()); // Usar selectedDate para obtener el día
-
-    const event = {
-        title: title,
-        description: description,
-        collaborator: collaborator,
-        status: status,
-        date: eventDate // Asegúrate de usar la fecha correcta aquí
-    };
-
-    // Agregar el evento al array de eventos
-    events.push(event);
-    
-    // Actualiza el calendario o haz lo que necesites para reflejar el nuevo evento
-    updateCalendar();
-    modal.style.display = "none"; // Cierra el modal
-}
-
-
-
-        // Inicializar el calendario
+        
         displayCalendar();
-
-        function updateCurrentMonth() {
-    const options = { month: 'long', year: 'numeric' };
-    currentMonth.textContent = new Date(year, month).toLocaleString('es-ES', options);
-}
-
-function displayCalendar() {
-    // Llama a la función para actualizar el mes actual
-    updateCurrentMonth();
-    
-    calendarDays.innerHTML = '';
-
-    const firstDay = new Date(year, month, 1);
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const startDay = firstDay.getDay();
-
-    for (let i = 0; i < startDay; i++) {
-        const emptyDiv = document.createElement("div");
-        calendarDays.appendChild(emptyDiv);
-    }
-
-    for (let day = 1; day <= daysInMonth; day++) {
-        const dayDiv = document.createElement("div");
-        dayDiv.className = "day";
-        dayDiv.onclick = () => openModal(day);
-
-        if (day === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear()) {
-            dayDiv.classList.add("today");
-        }
-
-        const eventForDay = events.find(event => 
-            event.date.getDate() === day && event.date.getMonth() === month && event.date.getFullYear() === year
-        );
-
-        if (eventForDay) {
-            dayDiv.classList.add("event");
-            dayDiv.style.backgroundColor = getStatusColor(eventForDay.status);
-            dayDiv.innerHTML = `
-                <span class="status-icon"> ${getStatusIcon(eventForDay.status)}  ${day} </span> <br> ${eventForDay.title}  <br>
-                <span>${eventForDay.collaborator} </span>
-            `;
-        } else {
-            dayDiv.textContent = day;
-        }
-
-        calendarDays.appendChild(dayDiv);
-    }
-}
-
-document.querySelector(".prev-month").addEventListener("click", () => {
-    month--;
-    if (month < 0) {
-        month = 11;
-        year--;
-    }
-    displayCalendar();
-});
-
-document.querySelector(".next-month").addEventListener("click", () => {
-    month++;
-    if (month > 11) {
-        month = 0;
-        year++;
-    }
-    displayCalendar();
-});
-
-// Inicializar el calendario con el mes actual
-displayCalendar();
-
-const miniCalendarContainer = document.getElementById("mini-calendar");
-
-function displayMiniCalendar() {
-    const today = new Date();
-    const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-    const startDay = new Date(today.getFullYear(), today.getMonth(), 1).getDay();
-
-    const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-
-    miniCalendarContainer.innerHTML = '';
-
-    // Agregar los nombres de los días
-    dayNames.forEach(day => {
-        const dayNameDiv = document.createElement('div');
-        dayNameDiv.className = 'day-name';
-        dayNameDiv.innerText = day;
-        miniCalendarContainer.appendChild(dayNameDiv);
-    });
-
-    // Agregar celdas vacías antes del primer día del mes
-    for (let i = 0; i < startDay; i++) {
-        const emptyDiv = document.createElement('div');
-        miniCalendarContainer.appendChild(emptyDiv);
-    }
-
-    // Agregar los días del mes
-    for (let day = 1; day <= daysInMonth; day++) {
-        const dayDiv = document.createElement('div');
-        dayDiv.innerText = day;
-
-        // Resaltar el día actual
-        if (day === today.getDate()) {
-            dayDiv.classList.add('today');
-        }
-
-        miniCalendarContainer.appendChild(dayDiv);
-    }
-}
-
-displayMiniCalendar();
-
-function addEvent(event) {
-    event.preventDefault();
-    const title = document.getElementById("event-title").value;
-    const description = document.getElementById("event-description").value;
-    const collaborator = document.getElementById("event-collaborator").value;
-    const status = document.getElementById("event-status").value;
-
-    // Crear una nueva fecha con la fecha del input
-    const eventDateInput = new Date(document.getElementById("event-date").value);
-    // Asegúrate de establecer la hora a 0
-    eventDateInput.setUTCHours(0, 0, 0, 0); // Establecer la hora a 00:00:00:000 UTC
-
-    // Buscar si ya existe un evento en la misma fecha
-    const existingEventIndex = events.findIndex(e => 
-        e.date.getTime() === eventDateInput.getTime() // Compara el tiempo para evitar problemas de comparación
-    );
-
-    if (existingEventIndex >= 0) {
-        // Si existe, actualizar el evento
-        events[existingEventIndex] = {
-            title,
-            date: eventDateInput,
-            description,
-            collaborator,
-            status
-        };
-    } else {
-        // Si no existe, agregar un nuevo evento
-        events.push({
-            title,
-            date: eventDateInput,
-            description,
-            collaborator,
-            status
+        
+        document.querySelector(".prev-month").addEventListener("click", () => {
+            month--;
+            if (month < 0) {
+                month = 11;
+                year--;
+            }
+            displayCalendar();
         });
-    }
+        
+        document.querySelector(".next-month").addEventListener("click", () => {
+            month++;
+            if (month > 11) {
+                month = 0;
+                year++;
+            }
+            displayCalendar();
+        });
+        
+        // Funcionalidad para los modales
+        const modal = document.getElementById("modal");
+        const addEventBtn = document.getElementById("add-event-btn");
+        const closeModal = document.querySelector(".close");
+        
+        const addMemberModal = document.getElementById("addMemberModal");
+        const addMemberBtn = document.getElementById("add-member-btn");
+        const closeMemberModal = document.querySelector(".close-member-modal");
 
-    closeModalFunction();
-    displayCalendar();
-}
-// Mostrar el nombre del usuario si ya ha iniciado sesión
-        window.onload = function() {
-            const username = sessionStorage.getItem('username');
-            if (username) {
-                document.getElementById('welcome-message').textContent = 'Bienvenido, ' + username;
-            } else {
-                // Redirigir al login si no hay usuario en la sesión
-                window.location.href = 'login.html';
+        // Mostrar modal de añadir evento
+        addEventBtn.onclick = () => {
+            modal.style.display = "block";
+        };
+
+        // Cerrar modal de añadir evento
+        closeModal.onclick = () => {
+            modal.style.display = "none";
+        };
+
+        // Mostrar modal de añadir miembro
+        addMemberBtn.onclick = () => {
+            addMemberModal.style.display = "block";
+        };
+
+        // Cerrar modal de añadir miembro
+        closeMemberModal.onclick = () => {
+            addMemberModal.style.display = "none";
+        };
+
+        // Cerrar modales al hacer clic fuera de ellos
+        window.onclick = (event) => {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+            if (event.target == addMemberModal) {
+                addMemberModal.style.display = "none";
             }
         };
 
-        // Variables para el modal de añadir miembro
-const addMemberButton = document.querySelector(".btn-add-member");
-const addMemberModal = document.getElementById("addMemberModal");
-const closeMemberModal = document.querySelector(".close-member-modal");
-const addMemberForm = document.getElementById("addMemberForm");
+        // Agregar evento al enviar el formulario
+        document.getElementById("add-event-form").onsubmit = function(event) {
+            event.preventDefault();
+            const title = document.getElementById("event-title").value;
+            const date = new Date(document.getElementById("event-date").value);
+            const description = document.getElementById("event-description").value;
+            const collaborator = document.getElementById("event-collaborator").value;
+            const status = document.getElementById("event-status").value;
 
-// Abrir modal de añadir miembro
-addMemberButton.addEventListener("click", () => {
-    addMemberModal.style.display = "block";
-});
+            events.push({ title, date, description, collaborator, status });
+            displayCalendar();
+            modal.style.display = "none";
+            this.reset(); // Resetear el formulario
+        };
 
-// Cerrar modal de añadir miembro
-closeMemberModal.addEventListener("click", () => {
-    addMemberModal.style.display = "none";
-});
+        // Agregar miembro al enviar el formulario
+        document.getElementById("addMemberForm").onsubmit = function(event) {
+            event.preventDefault();
+            const memberName = document.getElementById("member-name").value;
+            const memberRole = document.getElementById("member-role").value;
 
-// Cerrar modal cuando se hace clic fuera del modal
-window.addEventListener("click", (event) => {
-    if (event.target === addMemberModal) {
-        addMemberModal.style.display = "none";
+            const memberList = document.getElementById("team-members");
+            const newMember = document.createElement("li");
+            newMember.innerHTML = `<span>${memberName} - ${memberRole}</span>`;
+            memberList.appendChild(newMember);
+            addMemberModal.style.display = "none";
+            this.reset(); // Resetear el formulario
+        };
+
+        const miniCalendar = document.getElementById("mini-calendar");
+const monthYearDisplay = document.getElementById("month-year");
+let miniMonth = new Date().getMonth();
+let miniYear = new Date().getFullYear();
+
+function displayMiniCalendar() {
+    miniCalendar.innerHTML = '';
+    monthYearDisplay.textContent = `${getMonthName(miniMonth)} ${miniYear}`;
+    
+    const firstDay = new Date(miniYear, miniMonth, 1);
+    const daysInMonth = new Date(miniYear, miniMonth + 1, 0).getDate();
+    const startDay = firstDay.getDay();
+
+    // Celdas vacías antes del primer día del mes
+    for (let i = 0; i < startDay; i++) {
+        const emptyDiv = document.createElement("div");
+        miniCalendar.appendChild(emptyDiv);
     }
-});
 
-// Manejo del formulario de añadir miembro
-addMemberForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const memberName = document.getElementById("member-name").value;
-    const memberRole = document.getElementById("member-role").value;
+    // Crear los días del mes
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dayDiv = document.createElement("div");
+        dayDiv.className = "mini-day";
+        dayDiv.textContent = day;
 
-    // Aquí puedes agregar la lógica para añadir el miembro a tu lista de miembros
-    console.log("Añadido miembro:", memberName, "con rol:", memberRole);
+        // Resaltar el día actual
+        if (day === new Date().getDate() && miniMonth === new Date().getMonth() && miniYear === new Date().getFullYear()) {
+            dayDiv.classList.add("today");
+        }
 
-    // Después de añadir el miembro, puedes cerrar el modal y resetear el formulario
-    addMemberModal.style.display = "none";
-    addMemberForm.reset();
-});
+        miniCalendar.appendChild(dayDiv);
+    }
+}
 
+// Función para obtener el nombre del mes
+function getMonthName(month) {
+    const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", 
+                        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+    return monthNames[month];
+}
 
+// Navegar entre meses
+function changeMonth(direction) {
+    miniMonth += direction;
+    if (miniMonth < 0) {
+        miniMonth = 11;
+        miniYear--;
+    } else if (miniMonth > 11) {
+        miniMonth = 0;
+        miniYear++;
+    }
+    displayMiniCalendar();
+}
+
+// Inicializar el mini calendario
+displayMiniCalendar();
+
+// Agregar eventos para navegación
+document.querySelector(".prev-month").addEventListener("click", () => changeMonth(-1));
+document.querySelector(".next-month").addEventListener("click", () => changeMonth(1));
     </script>
 </body>
 </html>

@@ -305,3 +305,7 @@ font-weight: bold;
     text-decoration: none;
 }
 
+.month-year-display {
+    font-weight: bold;
+    margin: 10px 0;
+}
