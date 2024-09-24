@@ -234,23 +234,35 @@ body {
     color: #28a745; /* Green */
 }
 
-.view-filters {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
+.mini-calendar-container {
+margin-top: 20px;
 }
 
-.btn-filter {
-    background-color: #f39c12;
-    border: none;
-    padding: 10px;
-    color: white;
-    cursor: pointer;
-    margin: 0 10px;
-    border-radius: 5px;
-    transition: background-color 0.3s;
+#mini-calendar {
+display: grid;
+grid-template-columns: repeat(7, 1fr);
+gap: 5px;
+background-color: white;
+color: #333;
+padding: 10px;
+border-radius: 5px;
 }
 
-.btn-filter:hover {
-    background-color: #e67e22;
+#mini-calendar div {
+text-align: center;
+padding: 5px;
+font-size: 0.5rem;
+border-radius: 3px;
+margin-left: -66%;
+}
+
+#mini-calendar .day-name {
+font-weight: bold;
+color: #001744;
+}
+
+#mini-calendar .today {
+background-color: #f39c12;
+color: white;
+font-weight: bold;
 }
