@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeamSELCA - Calendario Colaborativo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="./assets/css/style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .navbar {
+            background-color: #001744;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .main-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: calc(100vh - 150px);
+            padding: 20px;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            margin: 20px;
+            padding: 40px;
+            text-align: center;
+            width: 300px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .card h3 {
+            margin: 15px 0;
+            color: #001744;
+            font-size: 24px;
+        }
+
+        .card p {
+            color: #555;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        .card a {
+            text-decoration: none;
+            color: white;
+            background-color: #001744;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .card a:hover {
+            background-color: #003366;
+        }
+
+        .card i {
+            font-size: 40px;
+            color: #001744;
+        }
+
+        .footer {
+            background-color: #001744;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+
+        .card::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            z-index: 0;
+        }
+
+        .card > * {
+            position: relative;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <div class="logo">TeamSELCA</div>
+            <div class="user-profile">
+                <span id="welcome-message">Bienvenido, Usuario</span>
+                <img src="./assets/img/logo-favicon.png" alt="Avatar" style="width: 30px;">
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="card">
+            <i class="fas fa-calendar-alt"></i>
+            <h3>Ver General</h3>
+            <p>Consulta y gestiona todos los eventos programados.</p> <br>
+            <a href="index.html">Abrir</a>
+        </div>
+        <div class="card">
+            <i class="fas fa-users"></i>
+            <h3>Personal</h3>
+            <p>Administra tus propios eventos.</p> <br>
+            <a href="personal.html">Abrir</a>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2024 TeamSELCA. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        // Mostrar el nombre del usuario si ya ha iniciado sesión
+        window.onload = function() {
+            const username = sessionStorage.getItem('username');
+            if (username) {
+                document.getElementById('welcome-message').textContent = 'Bienvenido, ' + username;
+            } else {
+                // Redirigir al login si no hay usuario en la sesión
+                window.location.href = 'login.html';
+            }
+        };
+    </script>
+</body>
+</html>

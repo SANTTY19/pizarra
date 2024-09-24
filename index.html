@@ -45,6 +45,8 @@
                 <button class="next-month">Siguiente</button>
             </div>
 
+            
+
             <div class="calendar">
                 <div class="day-names">
                     <div>Domingo</div>
@@ -100,6 +102,29 @@
             </form>
         </div>
     </div>
+
+    <!-- Modal para añadir miembro -->
+<div id="addMemberModal" class="modal">
+    <div class="modal-content">
+        <span class="close-member-modal">&times;</span>
+        <h2>Añadir Miembro</h2>
+        <form id="addMemberForm">
+            <div class="input-container">
+                <label for="member-name">Nombre del Miembro:</label>
+                <input type="text" id="member-name" name="member-name" required>
+            </div>
+            <div class="input-container">
+                <label for="member-role">Rol:</label>
+                <select id="member-role" name="member-role" required>
+                    <option value="tecnico">Técnico</option>
+                    <option value="administrativo">Administrativo</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-submit">Añadir Miembro</button>
+        </form>
+    </div>
+</div>
+
 
     <script>
 
@@ -410,6 +435,94 @@ function displayMiniCalendar() {
 }
 
 displayMiniCalendar();
+
+function addEvent(event) {
+    event.preventDefault();
+    const title = document.getElementById("event-title").value;
+    const description = document.getElementById("event-description").value;
+    const collaborator = document.getElementById("event-collaborator").value;
+    const status = document.getElementById("event-status").value;
+
+    // Crear una nueva fecha con la fecha del input
+    const eventDateInput = new Date(document.getElementById("event-date").value);
+    // Asegúrate de establecer la hora a 0
+    eventDateInput.setUTCHours(0, 0, 0, 0); // Establecer la hora a 00:00:00:000 UTC
+
+    // Buscar si ya existe un evento en la misma fecha
+    const existingEventIndex = events.findIndex(e => 
+        e.date.getTime() === eventDateInput.getTime() // Compara el tiempo para evitar problemas de comparación
+    );
+
+    if (existingEventIndex >= 0) {
+        // Si existe, actualizar el evento
+        events[existingEventIndex] = {
+            title,
+            date: eventDateInput,
+            description,
+            collaborator,
+            status
+        };
+    } else {
+        // Si no existe, agregar un nuevo evento
+        events.push({
+            title,
+            date: eventDateInput,
+            description,
+            collaborator,
+            status
+        });
+    }
+
+    closeModalFunction();
+    displayCalendar();
+}
+// Mostrar el nombre del usuario si ya ha iniciado sesión
+        window.onload = function() {
+            const username = sessionStorage.getItem('username');
+            if (username) {
+                document.getElementById('welcome-message').textContent = 'Bienvenido, ' + username;
+            } else {
+                // Redirigir al login si no hay usuario en la sesión
+                window.location.href = 'login.html';
+            }
+        };
+
+        // Variables para el modal de añadir miembro
+const addMemberButton = document.querySelector(".btn-add-member");
+const addMemberModal = document.getElementById("addMemberModal");
+const closeMemberModal = document.querySelector(".close-member-modal");
+const addMemberForm = document.getElementById("addMemberForm");
+
+// Abrir modal de añadir miembro
+addMemberButton.addEventListener("click", () => {
+    addMemberModal.style.display = "block";
+});
+
+// Cerrar modal de añadir miembro
+closeMemberModal.addEventListener("click", () => {
+    addMemberModal.style.display = "none";
+});
+
+// Cerrar modal cuando se hace clic fuera del modal
+window.addEventListener("click", (event) => {
+    if (event.target === addMemberModal) {
+        addMemberModal.style.display = "none";
+    }
+});
+
+// Manejo del formulario de añadir miembro
+addMemberForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const memberName = document.getElementById("member-name").value;
+    const memberRole = document.getElementById("member-role").value;
+
+    // Aquí puedes agregar la lógica para añadir el miembro a tu lista de miembros
+    console.log("Añadido miembro:", memberName, "con rol:", memberRole);
+
+    // Después de añadir el miembro, puedes cerrar el modal y resetear el formulario
+    addMemberModal.style.display = "none";
+    addMemberForm.reset();
+});
 
 
     </script>
