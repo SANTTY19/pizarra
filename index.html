@@ -135,42 +135,47 @@
         let year = selectedDate.getFullYear();
         
         function displayCalendar() {
-            calendarDays.innerHTML = '';
-            const firstDay = new Date(year, month, 1);
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const startDay = firstDay.getDay();
+    calendarDays.innerHTML = '';
     
-            for (let i = 0; i < startDay; i++) {
-                const emptyDiv = document.createElement("div");
-                calendarDays.appendChild(emptyDiv);
-            }
+    // Actualiza el mes mostrado
+    currentMonth.textContent = `${new Date(year, month).toLocaleString('default', { month: 'long' })} ${year}`;
     
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dayDiv = document.createElement("div");
-                dayDiv.className = "day";
-    
-                if (day === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear()) {
-                    dayDiv.classList.add("today");
-                }
-    
-                const eventForDay = events.find(event => 
-                    event.date.getDate() === day && event.date.getMonth() === month && event.date.getFullYear() === year
-                );
-    
-                if (eventForDay) {
-                    dayDiv.classList.add("event");
-                    dayDiv.style.backgroundColor = getStatusColor(eventForDay.status);
-                    dayDiv.innerHTML = `
-                        <span class="status-icon"> ${getStatusIcon(eventForDay.status)}  ${day} </span> <br> ${eventForDay.title}  <br>
-                        <span>${eventForDay.collaborator} </span>
-                    `;
-                } else {
-                    dayDiv.textContent = day;
-                }
-    
-                calendarDays.appendChild(dayDiv);
-            }
+    const firstDay = new Date(year, month, 1);
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const startDay = firstDay.getDay();
+
+    for (let i = 0; i < startDay; i++) {
+        const emptyDiv = document.createElement("div");
+        calendarDays.appendChild(emptyDiv);
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dayDiv = document.createElement("div");
+        dayDiv.className = "day";
+
+        if (day === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear()) {
+            dayDiv.classList.add("today");
         }
+
+        const eventForDay = events.find(event => 
+            event.date.getDate() === day && event.date.getMonth() === month && event.date.getFullYear() === year
+        );
+
+        if (eventForDay) {
+            dayDiv.classList.add("event");
+            dayDiv.style.backgroundColor = getStatusColor(eventForDay.status);
+            dayDiv.innerHTML = `
+                <span class="status-icon"> ${getStatusIcon(eventForDay.status)}  ${day} </span> <br> ${eventForDay.title}  <br>
+                <span>${eventForDay.collaborator} </span>
+            `;
+        } else {
+            dayDiv.textContent = day;
+        }
+
+        calendarDays.appendChild(dayDiv);
+    }
+}
+
         
         function getStatusIcon(status) {
             switch (status) {
