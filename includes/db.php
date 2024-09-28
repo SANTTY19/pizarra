@@ -1,18 +1,19 @@
 <?php
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "pizarra";
+// Archivo: db.php
 
-// Configurar el reporte de errores
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+$host = 'localhost';
+$db = 'pizarra'; // Nombre de tu base de datos
+$user = 'root'; // Usuario de MySQL
+$pass = ''; // Contraseña del usuario
 
-// Crear conexión con excepciones
 try {
-    $conn = new mysqli($servername, $username, $password, $dbname);
-    // Establecer el conjunto de caracteres para la conexión
-    $conn->set_charset("utf8mb4");
-} catch (mysqli_sql_exception $e) {
-    die("Connection failed: " . $e->getMessage());
+    // Crear una nueva conexión usando PDO
+    $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass);
+    // Establecer el modo de error de PDO a Excepciones
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    // Si ocurre un error en la conexión, se muestra el mensaje
+    echo 'Error de conexión: ' . $e->getMessage();
+    exit;
 }
 ?>

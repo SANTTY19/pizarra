@@ -1,6 +1,40 @@
 <?php
+// Incluir la conexión a la base de datos
+include './includes/db.php';
 
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Obtener los datos del formulario
+    $abonado = $_POST['abonado'];
+    $nombre = $_POST['nombre'];
+    $contribuyente = $_POST['contribuyente'];
+    $e_mail = $_POST['e_mail'];
+    $telefono1 = $_POST['telefono1'];
+    $direccion = $_POST['direccion'];
+    $titulo = $_POST['titulo'];
+    $fecha = $_POST['fecha'];
+    $descripcion = $_POST['descripcion'];
+    $colaborador = $_POST['colaborador'];
+    $estado = $_POST['estado'];
 
+    // Preparar la consulta SQL
+    $sql = "INSERT INTO eventos (abonado, nombre, contribuyente, e_mail, telefono1, direccion, titulo, fecha, descripcion, colaborador, estado) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+    // Preparar la sentencia
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("sssssssssss", $abonado, $nombre, $contribuyente, $e_mail, $telefono1, $direccion, $titulo, $fecha, $descripcion, $colaborador, $estado);
+
+    // Ejecutar la consulta
+    if ($stmt->execute()) {
+        echo "Evento guardado correctamente.";
+    } else {
+        echo "Error: " . $stmt->error;
+    }
+
+    // Cerrar la conexión
+    $stmt->close();
+    $conn->close();
+}
 ?>
 
 <!DOCTYPE html>
@@ -67,96 +101,97 @@
         </div>
     </div>
 
-   <!-- Modal para añadir evento -->
+<!-- Modal para añadir evento -->
 <div id="modal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
         <h2>Añadir Evento</h2>
-        <form id="add-event-form">
-            <!-- Campo para el número de abonado -->
-            <div class="input-container">
-                <label for="event-abonado">Número de Abonado</label>
-                <input type="text" id="event-abonado" placeholder="Ingrese número de abonado" required>
-            </div>
+        <br>
+         <!-- Botón para mostrar la tabla de clientes -->
+         <button type="button" id="show-client-table" class="btn-load">Seleccionar Cliente</button>
+        <br>
+        <form id="add-event-form" method="POST" action="guardar_evento.php">
+    <!-- Información del cliente autocompletada -->
+    <div id="client-info" class="client-info">
+        <div class="input-container">
+            <label for="event-abonado">Número de Abonado</label>
+            <input type="text" id="event-abonado" name="abonado" placeholder="Ingrese número de abonado" required>
+        </div>
+        <div class="input-container">
+            <label for="client-name">Nombre del Cliente</label>
+            <input type="text" id="client-name" name="nombre" disabled>
+        </div>
+        <div class="input-container">
+            <label for="client-id">Contribuyente</label>
+            <input type="text" id="client-id" name="contribuyente" disabled>
+        </div>
+        <div class="input-container">
+            <label for="client-email">Correo Electrónico</label>
+            <input type="email" id="client-email" name="e_mail" disabled>
+        </div>
+        <div class="input-container">
+            <label for="client-phone">Teléfono</label>
+            <input type="text" id="client-phone" name="telefono1" disabled>
+        </div>
+        <div class="input-container">
+            <label for="client-address">Dirección</label>
+            <textarea id="client-address" name="direccion" rows="2" disabled></textarea>
+        </div>
+    </div>
 
-            <!-- Campos autocompletados con la información del cliente -->
-            <div id="client-info" style="display: none;">
-                <div class="input-container">
-                    <label for="client-name">Nombre del Cliente</label>
-                    <input type="text" id="client-name" disabled>
-                </div>
-                <div class="input-container">
-                    <label for="client-id">Contribuyente</label>
-                    <input type="text" id="client-id" disabled>
-                </div>
-                <div class="input-container">
-                    <label for="client-email">Correo Electrónico</label>
-                    <input type="email" id="client-email" disabled>
-                </div>
-                <div class="input-container">
-                    <label for="client-phone">Teléfono</label>
-                    <input type="text" id="client-phone" disabled>
-                </div>
-                <div class="input-container">
-                    <label for="client-address">Dirección</label>
-                    <textarea id="client-address" rows="2" disabled></textarea>
-                </div>
-            </div>
+    <!-- Tabla de clientes -->
+    <div id="client-table-container" class="client-table-container">
+        <br>
+        <input type="text" id="client-search" placeholder="Buscar cliente..." onkeyup="filterClients()">
+        <table id="client-table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Contribuyente</th>
+                    <th>Correo Electrónico</th>
+                    <th>Teléfono</th>
+                </tr>
+            </thead>
+            <tbody id="client-table-body">
+                <!-- Los clientes se llenarán aquí dinámicamente -->
+            </tbody>
+        </table>
+    </div>
 
-            <!-- Botón para mostrar la tabla de clientes -->
-            <button type="button" id="show-client-table" class="btn-load">Seleccionar Cliente</button>
+    <!-- Otros campos del evento -->
+    <div class="input-container">
+        <label for="event-title">Título del Evento</label>
+        <input type="text" id="event-title" name="titulo" placeholder="Ingrese el título del evento" required>
+    </div>
+    <div class="input-container">
+        <label for="event-date">Fecha</label>
+        <input type="date" id="event-date" name="fecha" required>
+    </div>
+    <div class="input-container">
+        <label for="event-description">Descripción</label>
+        <textarea id="event-description" name="descripcion" rows="4" placeholder="Descripción del evento"></textarea>
+    </div>
+    <div class="input-container">
+        <label for="event-collaborator">Asignar a Colaborador</label>
+        <select id="event-collaborator" name="colaborador" required>
+            <option value="">Seleccione un colaborador</option>
+            <option value="Juan Pérez">Juan Pérez</option>
+            <option value="María González">María González</option>
+            <option value="Ana López">Ana López</option>
+        </select>
+    </div>
+    <div class="input-container">
+        <label for="event-status">Estado</label>
+        <select id="event-status" name="estado" required>
+            <option value="">Seleccione un estado</option>
+            <option value="urgente">Urgente</option>
+            <option value="medio">Medio</option>
+            <option value="basico">Básico</option>
+        </select>
+    </div>
+    <button type="submit" class="btn-submit">Guardar Evento</button>
+</form>
 
-            <!-- Tabla de clientes -->
-            <div id="client-table-container" style="display: none;">
-                <input type="text" id="client-search" placeholder="Buscar cliente..." onkeyup="filterClients()">
-                <table id="client-table">
-                    <thead>
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Contribuyente</th>
-                            <th>Correo Electrónico</th>
-                            <th>Teléfono</th>
-                        </tr>
-                    </thead>
-                    <tbody id="client-table-body">
-                        <!-- Los clientes se llenarán aquí dinámicamente -->
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Otros campos del evento -->
-            <div class="input-container">
-                <label for="event-title">Título del Evento</label>
-                <input type="text" id="event-title" placeholder="Ingrese el título del evento" required>
-            </div>
-            <div class="input-container">
-                <label for="event-date">Fecha</label>
-                <input type="date" id="event-date" required>
-            </div>
-            <div class="input-container">
-                <label for="event-description">Descripción</label>
-                <textarea id="event-description" rows="4" placeholder="Descripción del evento"></textarea>
-            </div>
-            <div class="input-container">
-                <label for="event-collaborator">Asignar a Colaborador</label>
-                <select id="event-collaborator" required>
-                    <option value="">Seleccione un colaborador</option>
-                    <option value="Juan Pérez">Juan Pérez</option>
-                    <option value="María González">María González</option>
-                    <option value="Ana López">Ana López</option>
-                </select>
-            </div>
-            <div class="input-container">
-                <label for="event-status">Estado</label>
-                <select id="event-status" required>
-                    <option value="">Seleccione un estado</option>
-                    <option value="urgente">Urgente</option>
-                    <option value="medio">Medio</option>
-                    <option value="basico">Básico</option>
-                </select>
-            </div>
-            <button type="submit" class="btn-submit">Guardar Evento</button>
-        </form>
     </div>
 </div>
 
@@ -167,7 +202,7 @@
         color: #333;
     }
 
-    /* Estilos para el modal */
+    /* Modal */
     .modal {
         display: none;
         position: fixed;
@@ -181,13 +216,15 @@
     }
 
     .modal-content {
-        background-color: #ffffff;
+        background-color: #fff;
         margin: 5% auto;
         padding: 20px;
         border-radius: 10px;
         width: 90%;
         max-width: 600px;
         box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+        max-height: 80vh;
+        overflow-y: auto;
     }
 
     .close {
@@ -197,21 +234,18 @@
         font-weight: bold;
     }
 
-    .close:hover,
-    .close:focus {
+    .close:hover {
         color: black;
-        text-decoration: none;
         cursor: pointer;
     }
 
-    /* Estilos de los campos de entrada */
+    /* Input Fields */
     .input-container {
         margin-bottom: 15px;
     }
 
     .input-container label {
         display: block;
-        margin-bottom: 5px;
         font-weight: bold;
     }
 
@@ -222,139 +256,167 @@
         padding: 10px;
         border: 1px solid #ccc;
         border-radius: 5px;
-        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
-        transition: border-color 0.3s ease;
     }
 
     .input-container input:focus,
     .input-container textarea:focus,
     .input-container select:focus {
-        border-color: #001744; /* Color de foco */
-        outline: none;
+        border-color: #001744;
     }
 
-    /* Estilos para el botón "Seleccionar Cliente" */
+    /* Buttons */
     .btn-load, .btn-submit {
-        background-color: #001744; /* Color de fondo */
-        color: white; /* Color del texto */
+        background-color: #001744;
+        color: white;
         border: none;
         padding: 10px 20px;
-        font-size: 16px;
         border-radius: 5px;
         cursor: pointer;
-        transition: background-color 0.3s ease, box-shadow 0.3s ease; /* Transición suave */
-        margin-top: 10px;
-    }
-
-    .btn-load:hover, .btn-submit:hover {
-        background-color: #0042cc; /* Color de fondo en hover */
-        box-shadow: 0px 4px 15px rgba(0, 23, 68, 0.4); /* Efecto de sombra en hover */
-    }
-
-    .btn-load:active, .btn-submit:active {
-        background-color: #001a66; /* Color al hacer clic */
-        box-shadow: 0px 2px 10px rgba(0, 23, 68, 0.2); /* Reducción de la sombra al hacer clic */
-        transform: scale(0.98); /* Efecto de presionado */
-    }
-
-    /* Estilos de la tabla */
-    #client-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 10px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-
-    #client-table th, #client-table td {
-        border: 1px solid #ddd;
-        padding: 10px;
-        text-align: left;
         transition: background-color 0.3s;
     }
 
-    #client-table th {
-        background-color: #f2f2f2;
-        font-weight: bold;
+    .btn-load:hover, .btn-submit:hover {
+        background-color: #0042cc;
     }
 
-    #client-table tbody tr:hover {
-        background-color: #e9e9e9; /* Color de fila al pasar el ratón */
+    .client-table-container {
+        display: none;
     }
 
-    /* Agregar barra de desplazamiento */
-    .modal-content {
-        max-height: 70vh; /* Limitar la altura máxima del modal */
-        overflow-y: auto; /* Habilitar el desplazamiento vertical */
-        padding-right: 15px; /* Evitar superposición con la barra de desplazamiento */
+    .client-info {
+        display: none;
     }
+
+   /* Tabla de clientes */
+#client-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+#client-table th, #client-table td {
+    padding: 12px 15px;
+    text-align: left;
+}
+
+#client-table th {
+    background-color: #001744;
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+#client-table td {
+    background-color: #f9f9f9;
+}
+
+#client-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+#client-table tr:hover {
+    background-color: #e0e0e0;
+    cursor: pointer;
+}
+
+/* Barra de búsqueda */
+#client-search {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-size: 16px;
+    background-image: url('https://cdn-icons-png.flaticon.com/512/54/54481.png');
+    background-position: 10px center;
+    background-repeat: no-repeat;
+    background-size: 20px;
+    padding-left: 40px; /* Para dejar espacio para el ícono */
+}
+
+#client-search:focus {
+    border-color: #001744;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 23, 68, 0.4);
+}
+
 </style>
 
 <script>
     document.getElementById('show-client-table').addEventListener('click', function() {
         const clientTableContainer = document.getElementById('client-table-container');
         clientTableContainer.style.display = clientTableContainer.style.display === 'none' ? 'block' : 'none';
-
-        // Aquí podrías cargar los datos de clientes en la tabla si es necesario
         loadClients();
     });
 
+    // Modificamos el código de la función que carga los datos del cliente al hacer clic en la tabla
     function loadClients() {
         fetch(`http://192.168.12.3:83/api/public/api/clientes/all`)
             .then(response => response.json())
             .then(data => {
                 const clientTableBody = document.getElementById('client-table-body');
-                clientTableBody.innerHTML = ''; // Limpiar la tabla antes de llenarla
-
+                clientTableBody.innerHTML = '';
                 data.forEach(cliente => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${cliente.nombre}</td>
                         <td>${cliente.contribuyente}</td>
-                        <td>${cliente.correo}</td>
-                        <td>${cliente.telefono}</td>
+                        <td>${cliente.e_mail}</td>
+                        <td>${cliente.telefono1}</td>
                     `;
-                    row.addEventListener('click', () => fillClientInfo(cliente));
+                    row.addEventListener('click', () => {
+                        document.getElementById('client-name').value = cliente.nombre;
+                        document.getElementById('client-id').value = cliente.contribuyente;
+                        document.getElementById('client-email').value = cliente.e_mail;
+                        document.getElementById('client-phone').value = cliente.telefono1;
+                        document.getElementById('client-address').value = cliente.direccion;
+                        document.getElementById('event-abonado').value = cliente.cliente; // Aquí se autocompleta el número de abonado
+                        document.getElementById('client-info').style.display = 'block';
+                        document.getElementById('client-table-container').style.display = 'none';
+                    });
                     clientTableBody.appendChild(row);
                 });
-            })
-            .catch(error => console.error('Error fetching clients:', error));
+            });
     }
 
-    function fillClientInfo(cliente) {
-        document.getElementById('event-abonado').value = cliente.cliente;
-        document.getElementById('client-name').value = cliente.nombre;
-        document.getElementById('client-id').value = cliente.contribuyente;
-        document.getElementById('client-email').value = cliente.correo;
-        document.getElementById('client-phone').value = cliente.telefono;
-        document.getElementById('client-address').value = cliente.direccion; // Asegúrate de que el campo "direccion" existe en la API
-
-        // Mostrar información del cliente
-        document.getElementById('client-info').style.display = 'block';
+    // Asignar la fecha seleccionada del calendario al campo de fecha en el modal
+    function openModal(selectedDate) {
+        // Abre el modal
+        document.getElementById("modal").style.display = "block";
+        
+        // Asigna la fecha seleccionada al campo de fecha
+        document.getElementById("event-date").value = selectedDate;
     }
+
+    // Escuchar clics en las celdas del calendario
+    document.querySelectorAll(".calendar-cell").forEach(cell => {
+        cell.addEventListener("click", function() {
+            const selectedDate = this.getAttribute("data-date"); // Captura la fecha seleccionada
+            openModal(selectedDate); // Abre el modal con la fecha preseleccionada
+        });
+    });
+
 
     function filterClients() {
-        const filter = document.getElementById('client-search').value.toLowerCase();
-        const rows = document.querySelectorAll('#client-table-body tr');
-
-        rows.forEach(row => {
-            const cells = row.getElementsByTagName('td');
+        const searchValue = document.getElementById('client-search').value.toLowerCase();
+        const clientRows = document.querySelectorAll('#client-table-body tr');
+        clientRows.forEach(row => {
+            const cells = row.querySelectorAll('td');
             let match = false;
-
-            for (let i = 0; i < cells.length; i++) {
-                const cellValue = cells[i].textContent || cells[i].innerText;
-                if (cellValue.toLowerCase().indexOf(filter) > -1) {
+            cells.forEach(cell => {
+                if (cell.textContent.toLowerCase().includes(searchValue)) {
                     match = true;
-                    break;
                 }
-            }
-
+            });
             row.style.display = match ? '' : 'none';
         });
     }
-
-    // Aquí puedes agregar más funcionalidades si es necesario
+    
 </script>
-
 
     <!-- Modal para añadir miembro -->
     <div id="addMemberModal" class="modal">
